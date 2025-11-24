@@ -1,0 +1,253 @@
+/* =========================
+   VARIABLES DE COULEURS
+========================= */
+:root {
+  --background: #1e1e2f; 
+  --text-color: #fff; 
+  --accent: #7c5cff; 
+  --accent-2: #5a3fff; 
+  --card-bg: rgba(255, 255, 255, 0.02); 
+  --card-hover: rgba(124, 92, 255, 0.3);
+}
+
+/* =========================
+   RESET GLOBAL
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-color);
+}
+
+/* =========================
+   TOAST
+========================= */
+.toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  background-color: var(--accent);
+  color: var(--text-color);
+  z-index: 1000;
+  animation: slideDown 0.5s ease;
+}
+
+.toast.success { background-color: #28a745; }
+.toast.danger { background-color: #dc3545; }
+.toast.info { background-color: var(--accent); }
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* =========================
+   PROFILE HEADER
+========================= */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-radius: 12px;
+  margin: 2rem;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: var(--card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.profile-info h1 {
+  font-size: 2rem;
+}
+
+.profile-info p {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* =========================
+   PROFILE STATS
+========================= */
+.profile-stats {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.profile-stat {
+  background-color: var(--card-bg);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--accent);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.stat-value {
+  font-size: 1rem;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+/* =========================
+   TABS
+========================= */
+.profile-tabs {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  background-color: #7c5cff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  color:white;
+  transition: background-color 0.3s ease;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+/* =========================
+   CONTENT SECTIONS
+========================= */
+.profile-main {
+  display: flex;
+  gap: 2rem;
+  padding: 0 2rem;
+  flex-wrap: wrap;
+}
+
+.content-section {
+  flex: 3;
+}
+
+.offers-sidebar {
+  flex: 1;
+  background-color: var(--card-bg);
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.offer-card {
+  background-color: rgba(255,255,255,0.05);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+}
+
+.offer-card button {
+  background-color: var(--accent);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.offer-card button:hover {
+  background-color: var(--accent-2);
+}
+
+/* =========================
+   FAVORITES GRID
+========================= */
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.favorite-card {
+  background-color: var(--card-bg);
+  padding: 1rem;
+  color: #fff;
+  border-radius: 12px;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.favorite-card:hover {
+  transform: translateY(-5px);
+  background-color: var(--card-hover);
+}
+
+/* =========================
+   RESERVATIONS HISTORY
+========================= */
+.reservation-card {
+    
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.reservation-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.reservation-details button.btn-cancel {
+  background-color: #dc3545;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.reservation-details button.btn-cancel:hover {
+  background-color: #a71d2a;
+}
+
+/* =========================
+   MEDIA QUERIES
+========================= */
+@media (max-width: 768px) {
+  .profile-main {
+    flex-direction: column;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+}
