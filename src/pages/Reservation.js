@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import './Reservation.css'; // ربطنا بالـ CSS
+import './Reservation.css'; 
+import Navbar from "../components/Navbar";
 
 export default function Reservation() {
   const { movieId } = useParams();
@@ -55,6 +56,7 @@ export default function Reservation() {
 
   return (
     <div className="reservation-container">
+        <Navbar/>
       <h2>{movie.title}</h2>
       
       <div className="date-selection">
