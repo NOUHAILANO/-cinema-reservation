@@ -68,3 +68,231 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# Rapport du Projet CinémaMax
+
+## 📋 Table des Matières
+1. [Introduction](#introduction)
+2. [Architecture du Projet](#architecture-du-projet)
+3. [Fonctionnalités Principales](#fonctionnalités-principales)
+4. [Composants Clés](#composants-clés)
+5. [Structure des Données](#structure-des-données)
+6. [Interface Utilisateur](#interface-utilisateur)
+7. [Sécurité et Gestion d'Accès](#sécurité-et-gestion-daccès)
+8. [Conclusion](#conclusion)
+
+## 🎬 Introduction
+
+CinémaMax est une application web complète de gestion de cinéma développée avec React. Elle permet aux utilisateurs de consulter les films, réserver des places, gérer leurs favoris, tandis que les administrateurs peuvent gérer l'ensemble du catalogue et des réservations.
+
+## 🏗 Architecture du Projet
+
+### Structure des Fichiers
+```
+src/
+├── components/
+│   ├── ProtectedRoute.js
+│   ├── Toast.js
+│   ├── TrailerModal.js
+│   └── Navbar.js
+├── context/
+│   ├── UserContext.js
+│   └── useFavorites.js
+├── pages/
+│   ├── Home.js
+│   ├── Login.js
+│   ├── Profile.js
+│   ├── Reservation.js
+│   ├── Payment.js
+│   └── AdminDashboard.js
+└── styles/
+    ├── styles.css
+    └── [autres fichiers CSS]
+```
+
+### Technologies Utilisées
+- **Frontend** : React 18, React Router DOM
+- **Backend** : JSON Server (port 5001)
+- **Styling** : CSS Modules
+- **Gestion d'état** : Context API
+
+## ⚙️ Fonctionnalités Principales
+
+### 👤 Pour les Utilisateurs
+- **Inscription/Connexion** simple
+- **Consultation du catalogue** de films avec filtres par catégorie
+- **Système de favoris** personnel
+- **Réservation de places** avec sélection visuelle des sièges
+- **Paiement sécurisé** (simulé)
+- **Profil utilisateur** avec historique et statistiques
+
+### 🛠 Pour les Administrateurs
+- **Tableau de bord complet** avec statistiques
+- **Gestion des films** (ajout, modification, suppression)
+- **Gestion des utilisateurs**
+- **Suivi des réservations**
+- **Analyse du chiffre d'affaires**
+
+## 🔧 Composants Clés
+
+### App.js - Routeur Principal
+```javascript
+function App() {
+  return (
+    <UserProvider>
+      <FavoritesProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/reservation/:movieId" element={<Reservation />} />
+            <Route path="/payment" element={<Payment />} />
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+          </Routes>
+        </Router>
+      </FavoritesProvider>
+    </UserProvider>
+  );
+}
+```
+
+### AdminDashboard.js - Panneau d'Administration
+Fonctionnalités administrateur complètes avec onglets :
+- 📊 Aperçu général avec statistiques
+- 🎬 Gestion des films (CRUD complet)
+- 👥 Gestion des utilisateurs
+- 🎫 Suivi des réservations
+
+### Home.js - Page d'Accueil
+Interface utilisateur riche avec :
+- Hero section attractive
+- Filtres par catégorie
+- Grid responsive des films
+- Modal de bandes-annonces
+- Statistiques utilisateur
+
+## 💾 Structure des Données
+
+### Modèle Film
+```javascript
+{
+  id: Number,
+  title: String,
+  category: String,
+  description: String,
+  duration: Number,
+  rating: Number,
+  price: Number,
+  sessions: Array,
+  trailerUrl: String,
+  trailerThumbnail: String,
+  seats: Object, // {"1-1": null, "1-2": userId, ...}
+  createdAt: String,
+  updatedAt: String
+}
+```
+
+### Modèle Utilisateur
+```javascript
+{
+  id: Number,
+  name: String,
+  email: String,
+  password: String,
+  role: String, // "user" ou "admin"
+  createdAt: String
+}
+```
+
+### Modèle Réservation
+```javascript
+{
+  id: Number,
+  movieId: Number,
+  movieTitle: String,
+  seats: Array,
+  date: String,
+  user: String, // email utilisateur
+  price: Number
+}
+```
+
+## 🎨 Interface Utilisateur
+
+### Design System
+- **Thème** : Interface moderne et cinématographique
+- **Couleurs** : Palette sombre avec accents colorés
+- **Typographie** : Polices lisibles et hiérarchie claire
+- **Responsive** : Adaptation mobile/desktop
+
+### Composants UI Remarquables
+- **Cartes de films** avec informations complètes
+- **Sélecteur de sièges** visuel et intuitif
+- **Tableaux administrateur** avec actions rapides
+- **Système de notifications** (Toast)
+- **Modal de bandes-annonces**
+
+## 🔐 Sécurité et Gestion d'Accès
+
+### ProtectedRoute.js
+```javascript
+// Vérification des privilèges administrateur
+const ProtectedRoute = ({ children }) => {
+  const { user, isAdmin } = useContext(UserContext);
+  
+  if (!user || !isAdmin()) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+```
+
+### Gestion des Rôles
+- **Utilisateur standard** : Réservations, favoris, profil
+- **Administrateur** : Accès complet au dashboard admin
+
+## 📊 Fonctionnalités Avancées
+
+### Système de Réservation
+- Vérification en temps réel de la disponibilité des sièges
+- Prévention des conflits de réservation
+- Calcul automatique du prix total
+
+### Gestion des Favoris
+- Persistance locale avec Context API
+- Synchronisation avec le profil utilisateur
+
+### Statistiques et Analytics
+- Chiffre d'affaires en temps réel
+- Taux d'occupation des séances
+- Préférences des utilisateurs
+
+## 🚀 Points Forts du Projet
+
+1. **Code Bien Structuré** : Architecture modulaire et réutilisable
+2. **Expérience Utilisateur** : Interface intuitive et responsive
+3. **Gestion d'État** : Utilisation optimale de Context API
+4. **Sécurité** : Protection des routes sensibles
+5. **Maintenabilité** : Code documenté et séparé en composants
+
+## 🔮 Améliorations Possibles
+
+1. **Authentification** : Implémentation JWT pour plus de sécurité
+2. **Base de Données** : Migration vers une base de données réelle
+3. **Paiement** : Intégration d'une passerelle de paiement réelle
+4. **Notifications** : Système de notifications push
+5. **Performance** : Implémentation de lazy loading
+
+## 💎 Conclusion
+
+CinémaMax représente une application React complète et professionnelle pour la gestion de cinéma. Son architecture solide, son interface utilisateur soignée et ses fonctionnalités complètes en font une solution adaptée aussi bien pour les utilisateurs finaux que pour les gestionnaires de salles de cinéma.
+
+Le projet démontre une maîtrise avancée des concepts React modernes, de la gestion d'état, du routing et de la création d'interfaces utilisateur complexes et interactives.
