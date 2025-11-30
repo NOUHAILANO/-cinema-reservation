@@ -56,8 +56,10 @@ function Login() {
 
   return (
 
+   
+
     <div className="login-container">
-        <Navbar/>
+      
       <form onSubmit={handleLogin}>
         <h2>Login / Register</h2>
         <input
