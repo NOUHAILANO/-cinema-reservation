@@ -2,13 +2,14 @@ import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useFavorites } from "../context/useFavorites";
 import { UserContext } from "../context/UserContext";
+import { useData } from "../context/DataContext";
 import Toast from "../components/Toast";
 import TrailerModal from "../components/TrailerModal";
 import Header from "../components/Header";
 import './Home.css';
 
 export default function Home() {
-  const [movies, setMovies] = useState([]);
+  const { movies } = useData();
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [toast, setToast] = useState({ message: '', type: 'info' });
@@ -18,17 +19,9 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5001/movies")
-      .then(res => res.json())
-      .then(data => {
-        setMovies(data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error("Error fetching movies:", error);
-        setLoading(false);
-      });
-  }, []);
+    // mark loading false once movies are available (or empty but loaded)
+    setLoading(false);
+  }, [movies]);
 
   const filteredMovies = filter === "all" 
     ? movies 
@@ -203,8 +196,7 @@ export default function Home() {
             {filteredMovies.map(movie => {
               const availableSeats = movie.seats ? Object.values(movie.seats).filter(seat => !seat).length : 0;
               const displaySessions = movie.sessions?.slice(0, 3) || [];
-              const totalSeats = movie.seats ? Object.values(movie.seats).length : 0;
-              const occupancyRate = totalSeats > 0 ? ((totalSeats - availableSeats) / totalSeats * 100).toFixed(0) : 0;
+              
               
               return (
                 <div key={movie.id} className="movie-card">

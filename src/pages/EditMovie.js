@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useData } from "../context/DataContext";
 
 export default function EditMovie({ movie, setEditingMovie, setMovies }) {
+  const { updateMovie } = useData();
   const [title, setTitle] = useState(movie.title);
   const [category, setCategory] = useState(movie.category);
   const [description, setDescription] = useState(movie.description);
@@ -9,14 +11,9 @@ export default function EditMovie({ movie, setEditingMovie, setMovies }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     const updatedMovie = { ...movie, title, category, description, price };
-    fetch(`http://localhost:5001/movies/${movie.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedMovie)
-    }).then(() => {
-      setMovies(prev => prev.map(m => m.id === movie.id ? updatedMovie : m));
-      setEditingMovie(null);
-    });
+    const updated = updateMovie(movie.id, updatedMovie);
+    setMovies(prev => prev.map(m => m.id === movie.id ? { ...m, ...updated } : m));
+    setEditingMovie(null);
   };
 
   return (

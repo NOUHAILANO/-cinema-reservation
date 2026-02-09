@@ -1,11 +1,12 @@
 import { useContext, useState, useEffect } from "react";
 import { UserContext } from "../context/UserContext";
+import { useData } from "../context/DataContext";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import './Login.css';
 
 function Login() {
   const { login } = useContext(UserContext);
+  const { getUserByEmail, addUser } = useData();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,25 +17,19 @@ function Login() {
     if (!email || !password) return alert("Enter email and password");
 
     try {
-      const res = await fetch(`http://localhost:5001/users?email=${email}`);
-      const data = await res.json();
+      const existing = getUserByEmail(email);
 
-      if (data.length === 0) {
+      if (!existing) {
         const newUser = { name: name || email, email, password, role: "user" };
-        const resAdd = await fetch("http://localhost:5001/users", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newUser)
-        });
-        const createdUser = await resAdd.json();
+        const createdUser = addUser(newUser);
         login(createdUser);
         alert("User registered and logged in!");
       } else {
-        if (data[0].password !== password) {
+        if (existing.password !== password) {
           alert("Invalid password!");
           return;
         }
-        login(data[0]);
+        login(existing);
         alert("Login successful!");
       }
 

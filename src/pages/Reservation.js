@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useData } from "../context/DataContext";
 import { useParams, useNavigate } from "react-router-dom";
 import './Reservation.css'; 
 import Navbar from "../components/Navbar";
 
 export default function Reservation() {
   const { movieId } = useParams();
+  const { movies } = useData();
   const [movie, setMovie] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
@@ -13,22 +15,13 @@ export default function Reservation() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchMovie = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await fetch(`http://localhost:5001/movies/${movieId}`);
-        if (!response.ok) throw new Error(`Erreur ${response.status}`);
-        const movieData = await response.json();
-        setMovie(movieData);
-      } catch (err) {
-        setError(`Impossible de charger les données du film: ${err.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMovie();
-  }, [movieId]);
+    setLoading(true);
+    setError(null);
+    const m = movies.find(mv => mv.id === movieId);
+    if (!m) setError('Film non trouvé');
+    setMovie(m || null);
+    setLoading(false);
+  }, [movieId, movies]);
 
   const toggleSeat = (seat) => {
     if (!movie || !movie.seats || movie.seats[seat]) return;

@@ -1,12 +1,14 @@
 import React, { useState, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
+import { useData } from '../context/DataContext';
 import Toast from '../components/Toast';
 
 export default function Payment(){
   const { state } = useLocation();
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
+  const { movies, bookSeats } = useData();
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState({ message: '', type: 'info' });
 
@@ -17,9 +19,8 @@ export default function Payment(){
   const handlePay = async () => {
     setSaving(true);
     try {
-      // Fetch current movie to check seats
-      const movieRes = await fetch(`http://localhost:5001/movies/${movieId}`);
-      const movie = await movieRes.json();
+      const movie = movies.find(m => m.id === movieId);
+      if (!movie) throw new Error('Movie not found');
 
       // Check availability
       const conflict = seats.some(s => movie.seats[s]);
@@ -29,35 +30,10 @@ export default function Payment(){
         return;
       }
 
-      // Reserve seats on movie
-      const updatedSeats = { ...movie.seats };
-      seats.forEach(s => updatedSeats[s] = true);
-
-      const patchRes = await fetch(`http://localhost:5001/movies/${movieId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seats: updatedSeats })
-      });
-      if (!patchRes.ok) throw new Error('Failed to reserve seats');
-
-      // Create reservation record
-      const reservation = {
-        movieId,
-        movieTitle,
-        seats,
-        date: new Date().toISOString(),
-        user: user ? user.email : 'guest'
-      };
-
-      const postRes = await fetch('http://localhost:5001/reservations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reservation)
-      });
-      if (!postRes.ok) throw new Error('Failed to create reservation');
+      // Book seats via DataContext (this will persist to localStorage and create a reservation)
+      bookSeats(movieId, seats, user?.id || 'guest');
 
       setToast({ message: 'Payment successful! Reservation created.', type: 'success' });
-      // short delay then navigate to profile
       setTimeout(() => navigate('/profile'), 900);
     } catch (err) {
       console.error(err);

@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { UserContext } from "../context/UserContext";
 import { useFavorites } from "../context/useFavorites";
+import { useData } from "../context/DataContext";
 import Toast from "../components/Toast";
 import "./profile.css"
 import Navbar from "../components/Navbar";
@@ -8,9 +9,9 @@ import Navbar from "../components/Navbar";
 export default function Profile() {
   const { user } = useContext(UserContext);
   const { favorites } = useFavorites();
+  const { reservations: allReservations, movies: allMovies, deleteReservation } = useData();
   const [reservations, setReservations] = useState([]);
   const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ message: '', type: 'info' });
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -21,33 +22,16 @@ export default function Profile() {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [resReservations, resMovies] = await Promise.all([
-          fetch('http://localhost:5001/reservations').then(res => res.json()),
-          fetch('http://localhost:5001/movies').then(res => res.json())
-        ]);
-
-        setMovies(resMovies);
-        const userReservations = resReservations.filter(r => r.user === user?.email);
-        setReservations(userReservations);
-        
-        setProfileStats(prev => ({
-          ...prev,
-          totalReservations: userReservations.length,
-          favoriteGenre: calculateFavoriteGenre(favorites, resMovies)
-        }));
-        
-      } catch (err) {
-        console.error("Erreur lors du chargement des données:", err);
-        setToast({ message: 'Erreur lors du chargement des données', type: 'danger' });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user) fetchData();
-  }, [user, favorites]);
+    if (!user) return;
+    const res = allReservations.filter(r => r.user === user.email);
+    setReservations(res);
+    setMovies(allMovies);
+    setProfileStats(prev => ({
+      ...prev,
+      totalReservations: res.length,
+      favoriteGenre: calculateFavoriteGenre(favorites, allMovies)
+    }));
+  }, [user, favorites, allReservations, allMovies]);
 
   const calculateFavoriteGenre = (userFavorites, allMovies) => {
     if (userFavorites.length === 0) return "Aucun";
@@ -69,15 +53,13 @@ export default function Profile() {
     return favorites.map(favId => movies.find(movie => movie.id === favId)).filter(Boolean);
   };
 
-  const cancelReservation = async (resId) => {
+  const cancelReservation = (resId) => {
     if (!window.confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) return;
-
-    try {
-      await fetch(`http://localhost:5001/reservations/${resId}`, { method: 'DELETE' });
+    const ok = deleteReservation(resId);
+    if (ok) {
       setReservations(prev => prev.filter(r => r.id !== resId));
       setToast({ message: 'Réservation annulée avec succès !', type: 'success' });
-    } catch (err) {
-      console.error("Erreur lors de l'annulation:", err);
+    } else {
       setToast({ message: 'Erreur lors de l\'annulation', type: 'danger' });
     }
   };

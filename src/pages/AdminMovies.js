@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useData } from "../context/DataContext";
 import { Link } from "react-router-dom";
 
 export default function AdminMovies() {
@@ -7,12 +8,11 @@ export default function AdminMovies() {
   const [category, setCategory] = useState("All");
   const [page, setPage] = useState(1);
   const limit = 6;
+  const { movies: allMovies, deleteMovie: deleteMovieCtx } = useData();
 
   useEffect(() => {
-    fetch("http://localhost:3001/movies")
-      .then(res => res.json())
-      .then(data => setMovies(data));
-  }, []);
+    setMovies(allMovies);
+  }, [allMovies]);
 
   const filtered = movies.filter(m =>
     m.title.toLowerCase().includes(search.toLowerCase()) &&
@@ -23,8 +23,8 @@ export default function AdminMovies() {
   const paginated = filtered.slice((page-1)*limit, page*limit);
 
   const deleteMovie = id => {
-    fetch(`http://localhost:3001/movies/${id}`,{method:"DELETE"})
-    .then(()=>setMovies(movies.filter(m=>m.id!==id)));
+    deleteMovieCtx(id);
+    setMovies(prev => prev.filter(m => m.id !== id));
   };
 
   return (

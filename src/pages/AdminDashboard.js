@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useData } from '../context/DataContext';
+
 import './AdminDashboard.css';
 import Navbar from '../components/Navbar';
 
@@ -10,7 +11,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('movies');
   const [editingMovie, setEditingMovie] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const navigate = useNavigate();
+  
 
   // États pour le formulaire
   const [formData, setFormData] = useState({
@@ -26,45 +27,20 @@ const AdminDashboard = () => {
     seats: {}
   });
 
-  // Charger les données
+  const { movies: allMovies, reservations: allReservations, users: allUsers, addMovie, updateMovie, deleteMovie: deleteMovieCtx, deleteUser: deleteUserCtx } = useData();
+
   useEffect(() => {
-    fetchMovies();
-    fetchReservations();
-    fetchUsers();
-  }, []);
-
-  const fetchMovies = () => {
-    fetch('http://localhost:5001/movies')
-      .then(res => res.json())
-      .then(data => setMovies(data))
-      .catch(err => console.log(err));
-  };
-
-  const fetchReservations = () => {
-    fetch('http://localhost:5001/reservations')
-      .then(res => res.json())
-      .then(data => setReservations(data))
-      .catch(err => console.log(err));
-  };
-
-  const fetchUsers = () => {
-    fetch('http://localhost:5001/users')
-      .then(res => res.json())
-      .then(data => setUsers(data.filter(user => user.role !== 'admin')))
-      .catch(err => console.log(err));
-  };
+    setMovies(allMovies);
+    setReservations(allReservations);
+    setUsers((allUsers || []).filter(u => u.role !== 'admin'));
+  }, [allMovies, allReservations, allUsers]);
 
   // Gestion des films
   const handleDeleteMovie = (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce film ?')) {
-      fetch(`http://localhost:5001/movies/${id}`, {
-        method: 'DELETE'
-      })
-      .then(() => {
-        setMovies(movies.filter(movie => movie.id !== id));
-        alert('Film supprimé avec succès !');
-      })
-      .catch(err => console.log(err));
+      deleteMovieCtx(id);
+      setMovies(prev => prev.filter(movie => movie.id !== id));
+      alert('Film supprimé avec succès !');
     }
   };
 
@@ -149,49 +125,16 @@ const AdminDashboard = () => {
     };
 
     if (editingMovie) {
-      // Modification
-      fetch(`http://localhost:5001/movies/${editingMovie.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...editingMovie,
-          ...movieData,
-          updatedAt: new Date().toISOString()
-        })
-      })
-      .then(res => res.json())
-      .then(updatedMovie => {
-        setMovies(movies.map(movie => 
-          movie.id === editingMovie.id ? updatedMovie : movie
-        ));
-        setShowAddForm(false);
-        setEditingMovie(null);
-        alert('Film modifié avec succès !');
-      })
-      .catch(err => console.log(err));
+      const updated = updateMovie(editingMovie.id, { ...editingMovie, ...movieData });
+      setMovies(prev => prev.map(m => m.id === editingMovie.id ? updated : m));
+      setShowAddForm(false);
+      setEditingMovie(null);
+      alert('Film modifié avec succès !');
     } else {
-      // Ajout
-      fetch('http://localhost:5001/movies', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...movieData,
-          id: Date.now(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        })
-      })
-      .then(res => res.json())
-      .then(newMovie => {
-        setMovies([...movies, newMovie]);
-        setShowAddForm(false);
-        alert('Film ajouté avec succès !');
-      })
-      .catch(err => console.log(err));
+      const newMovie = addMovie({ ...movieData });
+      setMovies(prev => [...prev, newMovie]);
+      setShowAddForm(false);
+      alert('Film ajouté avec succès !');
     }
   };
 
@@ -208,14 +151,9 @@ const AdminDashboard = () => {
   // Gestion des utilisateurs
   const handleDeleteUser = (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      fetch(`http://localhost:5001/users/${id}`, {
-        method: 'DELETE'
-      })
-      .then(() => {
-        setUsers(users.filter(user => user.id !== id));
-        alert('Utilisateur supprimé avec succès !');
-      })
-      .catch(err => console.log(err));
+      deleteUserCtx(id);
+      setUsers(prev => prev.filter(user => user.id !== id));
+      alert('Utilisateur supprimé avec succès !');
     }
   };
 
